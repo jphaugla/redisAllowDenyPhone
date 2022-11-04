@@ -15,9 +15,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -31,7 +29,7 @@ public class AllowDenyService {
     Jedis  jedis;
     JedisPool jedisPool;
     String redisUrl = "redis://localhost:6379"; // default named
-    ArrayList<FromTo> allFromTo;
+    Map<String, String> allFromTo = new HashMap<String, String>();
     public FromTo returnFromTo(String from, String to, String product) {
         FromTo fromTo = fromToRepository.get(from, to, product, jedis);
         return fromTo;
@@ -84,7 +82,7 @@ public class AllowDenyService {
         URI uri = new URI(redisUrl);
         jedis = new Jedis(uri);
         jedisPool = new JedisPool(uri);
-        allFromTo = new ArrayList<FromTo>();
+        allFromTo = new HashMap<String, String>();
 
     }
 
@@ -96,18 +94,13 @@ public class AllowDenyService {
         if (allFromTo.size() > 0 ) {
             allFromTo.clear();
         }
+
         while (iterator.hasNext()) {
-           results.addAll(iterator.next());
+            results.addAll(iterator.next());
+            Map<String, String> hash = fromToRepository.get(results, jedis);
+            allFromTo.putAll(hash);
+            results.clear();
         }
-        for (int i =0; i < results.size(); i++) {
-            String key = results.get(i);
-            log.info("key is " + key);
-            FromTo nextFromTo = fromToRepository.get(key, jedis);
-            allFromTo.add(nextFromTo);
-        }
-        log.info("number of elements " + results.size());
-        log.info("results");
-        log.info(results.toString());
         log.info("fromTo");
         log.info(allFromTo.toString());
 
