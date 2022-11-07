@@ -5,7 +5,6 @@
 	<packaging>pom</packaging>
         <modules>
             <module>redis-publisher</module>
-            <module>redis-consumer</module>
             <module>cache-instance</module>
         </modules>
 	<parent>

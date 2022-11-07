@@ -7,6 +7,7 @@ import com.redis.allowDeny.service.AllowDenyService;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.util.HashMap;
 
 @Slf4j
 @CrossOrigin(origins = "*")
@@ -20,6 +21,7 @@ public class AllowDenyRestController {
 
     @GetMapping("/status")
     public String status() {
+        log.info("this is the status check");
         return "OK";
     }
     @GetMapping("/key")
@@ -35,8 +37,22 @@ public class AllowDenyRestController {
     }
     @GetMapping("/reload")
     public String reloadData() {
-        return allowDenyService.reloadData(100,FromTo.getPREFIX() + '*');
+        return allowDenyService.reloadData(100,FromTo.getPREFIX() + '*', Boolean.TRUE);
     }
 
+    @GetMapping("/dumpCache")
+    public String dumpCache() {
+        return allowDenyService.getAllHash();
+    }
+
+    @GetMapping("/checkCache")
+    public HashMap<String,String> checkCache() {
+        return allowDenyService.checkCache();
+    }
+
+    @GetMapping("/getCache")
+    public HashMap<String, String> getCache(String key) {
+        return allowDenyService.getCache(key);
+    }
 
 }

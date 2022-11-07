@@ -18,7 +18,6 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-import java.sql.Timestamp;
 import java.util.*;
 
 @Slf4j
@@ -34,7 +33,7 @@ public class AllowDenyService {
     Jedis  jedis;
     JedisPool jedisPool;
     String redisUrl = "redis://localhost:6379"; // default named
-    Map<String, String> allFromTo = new HashMap<String, String>();
+    HashMap<String, String> allFromTo = new HashMap<String, String>();
     @Value("${server.port}")
     private int serverPort;
     public FromTo returnFromTo(String from, String to, String product) {
@@ -43,40 +42,10 @@ public class AllowDenyService {
     }
     public String createFromTo(FromTo fromTo) {
         fromToRepository.create(fromTo, jedis);
+        addToAllFromTo(fromTo.getKey(), fromTo.getValue());
         return "Success\n";
     }
-/*
-    private static void loadJSONfile()
-    private static void loadData(String from,String to, String Destination, String rule_id){
-        long startRange = startValue; // something like 4000000000000000000l
-        long endRangeDelta = (int)Math.floor(Math.random()*((10000/deltaBase)-10+1)+10);//at least 10 cards in a range
-        float protocol1Base = 1.2f;
-        float protocol2Base = 1.2f;
-        String BIN_BASE = null;
-        String cardType = null;
-        Pipeline pipelinedJedis = jedis.pipelined();
-        for(int x=0;x<5000000;x++){
-            BIN_BASE=Long.toString(startRange).substring(0,1); // to calculate cardType
-            cardType= Integer.parseInt(BIN_BASE)%2==1 ? "Mastercard" : "Visa";
-            startRange+=x;
-            BIN_BASE = Long.toString(startRange).substring(0,bin_base_upper_bound); //to allow for filtering results better
-            HashMap<String,String> values = new HashMap<String,String>();
-            values.put("startRange",startRange+"");
-            values.put("endRange",startRange+endRangeDelta+"");
-            values.put("actionInd","A");
-            values.put("dsAlias", cardType);
-            values.put("acsStartProtocolVersion", ""+protocol1Base+(x%4));
-            values.put("acsEndProtocolVersion", ""+protocol1Base+(x%4));
-            values.put("dsStartProtocolVersion",""+protocol2Base+(x%3));
-            values.put("dsEndProtocolVersion", ""+protocol2Base+(x%3));
-            values.put("BIN_BASE", BIN_BASE);
-            values.put("acsInfoInd", "04,02,03,01");
-            pipelinedJedis.hset("CARD:RANGE:"+keyBatchPrefix+":"+startRange,values);
-            x+=endRangeDelta;//for loop will add an additional 1 to x
-        }
-        pipelinedJedis.sync();
-    }
-    */
+
     public RedisIterator iterator(int initialScanCount, String pattern, ScanStrategy strategy) {
         return new RedisIterator(jedisPool, initialScanCount, pattern, strategy);
     }
@@ -89,35 +58,58 @@ public class AllowDenyService {
         URI uri = new URI(redisUrl);
         jedis = new Jedis(uri);
         jedisPool = new JedisPool(uri);
-        allFromTo = new HashMap<String, String>();
         //  add entry to sorted set for this IP address
         //   with timestamp from before kicking off the reload
         Double timestamp = (double) System.currentTimeMillis();
         String ip = String.valueOf(InetAddress.getLocalHost().getHostAddress());
-        String returnVal =  this.reloadData(100,FromTo.getPREFIX() + '*');
+        String returnVal =  this.reloadData(100,FromTo.getPREFIX() + '*', Boolean.FALSE);
         final long zadd = jedis.zadd("redis-instance-set", timestamp,
                 ip + ':' + serverPort);
 
     }
 
 
-    public String reloadData(int loopSize, String prefix) {
+    public String reloadData(int loopSize, String prefix, Boolean clearExisting) {
         ScanStrategy<String> scanStrategy = new Scan();
         RedisIterator iterator = iterator(loopSize, prefix + "*", scanStrategy);
         List<String> results = new LinkedList<String>();
-        if (allFromTo.size() > 0 ) {
+        if (clearExisting && (allFromTo.size() > 0)) {
             allFromTo.clear();
         }
 
         while (iterator.hasNext()) {
             results.addAll(iterator.next());
             Map<String, String> hash = fromToRepository.get(results, jedis);
-            allFromTo.putAll(hash);
+            addToAllFromTo(hash);
             results.clear();
         }
         log.info("fromTo");
         log.info(allFromTo.toString());
 
         return "Success\n";
+    }
+    public void addToAllFromTo(Map<String, String> hash) {
+        allFromTo.putAll(hash);
+    }
+    public void addToAllFromTo(String key, String value) {
+        allFromTo.put(key, value);
+    }
+
+    public String getAllHash() {
+        return allFromTo.toString();
+    }
+
+    public HashMap<String, String> checkCache() {
+        HashMap<String, String> statistics = new HashMap<String, String>();
+        int sizeHash = allFromTo.size();
+        statistics.put("Hash Size", String.valueOf(sizeHash));
+        return statistics;
+    }
+
+    public HashMap<String, String> getCache(String key) {
+        HashMap<String, String> hash = new HashMap<String, String>();
+        String value = allFromTo.get(key);
+        hash.put(key, value);
+        return hash;
     }
 }

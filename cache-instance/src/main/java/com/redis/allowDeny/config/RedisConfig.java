@@ -1,6 +1,6 @@
-package com.spring.redis.streams.config;
+package com.redis.allowDeny.config;
 
-import com.spring.redis.streams.domain.FromTo;
+import com.redis.allowDeny.domain.FromTo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

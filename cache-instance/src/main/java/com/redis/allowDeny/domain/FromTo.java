@@ -21,6 +21,13 @@ public class FromTo implements Serializable {
     private static int FROM_KEY=1;
     private static int TO_KEY=2;
     private static int PRODUCT_KEY=3;
+    // values
+    private String decision;
+    private String ruleId;
+    private String reason;
+    private static int DECISION_KEY=0;
+    private static int RULE_ID_KEY=1;
+    private static int REASON_KEY=2;
     public static String generateKey(String from, String to, String product) {
         return (PREFIX + from + ':' + to + ':' + product);
     }
@@ -43,13 +50,7 @@ public class FromTo implements Serializable {
     public static String getProductKey(String key) {
         return getKeys(key)[PRODUCT_KEY];
     }
-    // values
-    private String decision;
-    private String ruleId;
-    private String reason;
-    private static int DECISION_KEY=0;
-    private static int RULE_ID_KEY=1;
-    private static int REASON_KEY=2;
+
     public static String generateValue(String decision, String rule_id, String reason) {
         return (decision + ':' + rule_id + ':' + reason);
     }
