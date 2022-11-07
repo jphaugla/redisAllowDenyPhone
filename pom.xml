@@ -2,6 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	<packaging>pom</packaging>
+        <modules>
+            <module>redis-publisher</module>
+            <module>redis-consumer</module>
+            <module>cache-instance</module>
+        </modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -18,7 +24,6 @@
 		<java.version>11</java.version>
 		<version.jedis>4.3.0-m1</version.jedis>
 		<version.javax.inject>1</version.javax.inject>
-                <start-class>com.redis.allowDeny.AllowDenyRedisRestApplication</start-class>
 	</properties>
 
 	<repositories>
@@ -35,6 +40,11 @@
 			<artifactId>jedis</artifactId>
 			<version>${version.jedis}</version>
 		</dependency>
+                <dependency>
+                        <groupId>com.github.javafaker</groupId>
+                        <artifactId>javafaker</artifactId>
+                        <version>1.0.2</version>
+	       </dependency>
 
 
 		<!-- SpringBoot related dependencies -->
@@ -42,8 +52,22 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+                <dependency>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+                </dependency>
 
+                <dependency>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-test</artifactId>
+                        <scope>test</scope>
+                </dependency>
 
+                <dependency>
+                        <groupId>io.projectreactor</groupId>
+                        <artifactId>reactor-test</artifactId>
+                        <scope>test</scope>
+                </dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -56,17 +80,6 @@
 		</dependency>
 
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.junit.vintage</groupId>
-					<artifactId>junit-vintage-engine</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 	</dependencies>
 
 	<build>
