@@ -6,6 +6,7 @@ Caches allow/deny rules in a local java application server with a backend of the
 - [Important Links](#important-linksnotes)
 - [Instructions](#instructions)
     - [Multiple Deployment options](#multiple-options-for-creating-the-environment)
+    - [Data Model](#data-model)
     - [Create Environment](#create-environment)
       - [Set the Environment](#set-the-environment)
       - [Start docker redis](#start-redis-with-docker)
@@ -46,6 +47,17 @@ environment variable at scripts/setEnvironment.sh.
 | REDIS_PORT             | 6379               | redis port                                                                                             |     
 | REDIS_URL              | redis://redis:6379 | redis URL                                                                                              |     
 | ---------------------- | -----------------  | ------------------------------------------------------------------------------------------------------ |
+
+### Data Model
+The basic data model is:
+{ "from": "6124084322", "to": "7873032122", "product": "C", "decision": "A", "ruleId": "2", "reason": "732" }
+The cached data is stored in a hash map as a simple key value pair:
+KEY
+prefix:to phone number:from phone number:product
+rle:6124084322:7873032122:C
+VALUE
+decision:ruleID:reason
+A:2:732
 
 ### Multiple options for creating the environment:
 * run with docker-compose using a maven container and redis container (maven container not completed yet)
