@@ -25,8 +25,11 @@ application instance writes the data.
 * [pipelining with jedis 4 responses](https://www.baeldung.com/jedis-java-redis-client-library)
 * [jedis scan](https://www.baeldung.com/redis-list-available-keys)
 * [Spring Data Redis Reactive](https://www.baeldung.com/spring-data-redis-reactive)
+* [Spring Data Redis Reactive Listener](https://github.com/spring-projects/spring-data-redis/blob/main/src/main/asciidoc/reference/redis-streams.adoc)
 * [Redis Stream with Spring Boot](https://www.vinsguru.com/redis-stream-with-spring-boot/)
 * [github for blog](https://github.com/vinsguru/vinsguru-blog-code-samples/tree/master/redis/redis-stream)
+* [Redis spring boot reactive streams](https://medium.com/nerd-for-tech/event-driven-architecture-with-redis-streams-using-spring-boot-a81a1c9a4cde)
+* [github for blog above](https://github.com/ereshzealous/redis-stream)
 * [java faker data](https://www.baeldung.com/java-faker)
 
 ## Instructions
@@ -46,6 +49,7 @@ environment variable at scripts/setEnvironment.sh.
 | REDIS_PASSWORD         | <none>             | Redis Password  (not used yet)                                                                         |
 | REDIS_PORT             | 6379               | redis port                                                                                             |     
 | REDIS_URL              | redis://redis:6379 | redis URL                                                                                              |     
+| SERVER_PORT            | 5000               | Application Server Port                                                                                |
 | ---------------------- | -----------------  | ------------------------------------------------------------------------------------------------------ |
 
 ### Data Model
@@ -93,6 +97,15 @@ source scripts/setEnvironment.sh
 cd redis-publisher
 java -jar target/redis-publisher-0.0.1-SNAPSHOT.jar
 ```
+#### Start second cache instance
+For best testing start this after quite a few messages have already been processed by first consumer
+Use *./scripts/checkCache.sh* to verify cache instances are in sync
+```bash
+edit scripts/setEnvironment.sh to have a new port number (maybe 5001)
+source scripts/setEnvironment.sh
+cd cache-instance
+java -jar target/cache-instance-0.0.1-SNAPSHOT.jar
+```
 #### API calls
 ```bash
 cd scripts 
@@ -107,5 +120,7 @@ cd scripts
 # dump cache - string print of cache
 ./dumpCache.sh
 # check cache - get size of the client cache
+# this can be used to verify two caches are in sync
+# edit checkCache for the port number used
 ./checkCache.sh
 ```

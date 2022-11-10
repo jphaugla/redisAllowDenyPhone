@@ -29,6 +29,8 @@ public class RedisConfig {
 
 	@Value("${stream.key}")
 	private String streamKey;
+	@Value("${server.port}")
+	private int serverPort;
 
 	private final StreamListener<String, ObjectRecord<String, FromTo>> streamListener;
 
@@ -39,15 +41,22 @@ public class RedisConfig {
 				.StreamMessageListenerContainerOptions.builder().pollTimeout(Duration.ofSeconds(1)).targetType(FromTo.class).build();
 		StreamMessageListenerContainer<String, ObjectRecord<String, FromTo>>  listenerContainer = StreamMessageListenerContainer
 				.create(redisConnectionFactory, options);
+		String ip = String.valueOf(InetAddress.getLocalHost().getHostAddress());
+		String serverKey = ip + ':' + String.valueOf(serverPort);
+		String groupName = streamKey + serverKey;
 		try {
+			log.info("before xgroup create with serverkey " + serverKey);
 			redisConnectionFactory.getConnection()
-			                      .xGroupCreate(streamKey.getBytes(), streamKey, ReadOffset.from("0-0"), true);
+			                      .xGroupCreate(streamKey.getBytes(), groupName, ReadOffset.from("0-0"), true);
 		} catch (RedisSystemException exception) {
+			log.info("in exception handler fro xgroupcreate");
 			log.warn(exception.getCause().getMessage());
 		}
-		Subscription subscription = listenerContainer.receive(Consumer.from(streamKey, InetAddress.getLocalHost().getHostName()),
+		log.info("before create subscription");
+		Subscription subscription = listenerContainer.receive(Consumer.from(groupName, InetAddress.getLocalHost().getHostName()),
 		                                                      StreamOffset.create(streamKey, ReadOffset.lastConsumed()), streamListener);
 		listenerContainer.start();
+		log.info("after start listenerContainer");
 		return subscription;
 	}
 }

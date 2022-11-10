@@ -1,13 +1,19 @@
 package com.redis.allowDeny.repository;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Repository;
 import com.redis.allowDeny.domain.FromTo;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 
 @Repository
 @Slf4j
@@ -18,6 +24,7 @@ public class FromToRepository {
         hash.put("decision", fromTo.getDecision());
         hash.put("ruleId",fromTo.getRuleId());
         hash.put("reason",fromTo.getReason());
+
         jedis.hset(fromTo.getKey(), hash);
         return "Success\n";
     }

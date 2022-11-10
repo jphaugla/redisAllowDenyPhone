@@ -5,6 +5,7 @@ import com.redis.allowDeny.strategy.ScanStrategy;
 import com.redis.allowDeny.strategy.impl.Scan;
 import com.redis.allowDeny.repository.FromToRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import redis.clients.jedis.*;
 
 
@@ -29,13 +30,13 @@ public class AllowDenyService {
     @Autowired
     private FromToRepository fromToRepository;
 
-
     Jedis  jedis;
     JedisPool jedisPool;
     String redisUrl = "redis://localhost:6379"; // default named
     HashMap<String, String> allFromTo = new HashMap<String, String>();
     @Value("${server.port}")
     private int serverPort;
+
     public FromTo returnFromTo(String from, String to, String product) {
         FromTo fromTo = fromToRepository.get(from, to, product, jedis);
         return fromTo;
@@ -52,7 +53,7 @@ public class AllowDenyService {
 
     @PostConstruct
     private void init() throws URISyntaxException, UnknownHostException {
-        log.info("Init RediSearchService");
+        log.info("Init AllowDeny Service");
 
         redisUrl =  env.getProperty("redis.url");
         URI uri = new URI(redisUrl);
@@ -96,6 +97,7 @@ public class AllowDenyService {
     }
 
     public String getAllHash() {
+
         return allFromTo.toString();
     }
 

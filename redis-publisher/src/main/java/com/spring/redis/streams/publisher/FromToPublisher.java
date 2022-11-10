@@ -20,8 +20,12 @@ public class FromToPublisher {
 
 	private AtomicInteger atomicInteger = new AtomicInteger(0);
     FromToPublisherRepository fromToPublisherRepository;
+	@Value("${stream.trimSize}")
+	private int trimSize;
 	@Value("${stream.key}")
 	private String streamKey;
+
+
 
 	private final ReactiveRedisTemplate<String, String> redisTemplate;
 
@@ -34,6 +38,8 @@ public class FromToPublisher {
 	@Scheduled(fixedRateString= "${publish.rate}")
 	public void publishEvent(){
 		FromTo fromTo = this.fromToPublisherRepository.getRandomFromTo();
+		// set the ruleId to atomic integer
+		fromTo.setRuleId(String.valueOf(atomicInteger));
 		log.info("From To :: "+fromTo);
 		ObjectRecord<String, FromTo> record = StreamRecords.newRecord()
 		                                                         .ofObject(fromTo)
@@ -43,6 +49,12 @@ public class FromToPublisher {
 				.add(record)
 				.subscribe(System.out::println);
 		atomicInteger.incrementAndGet();
+		//  every 100 messages check to trim the stream to 500
+		if(atomicInteger.get() % 100 == 0) {
+			this.redisTemplate
+					.opsForStream()
+					.trim(streamKey, trimSize, true);
+		}
 	}
 
 	@Scheduled(fixedRate = 10000)

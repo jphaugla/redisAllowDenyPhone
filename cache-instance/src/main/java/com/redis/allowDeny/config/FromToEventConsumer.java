@@ -7,18 +7,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.data.domain.Range;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.stream.ObjectRecord;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.stream.StreamListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
+
 
 import javax.inject.Inject;
-import java.net.HttpURLConnection;
+
 import java.net.InetAddress;
-import java.net.URL;
+
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
